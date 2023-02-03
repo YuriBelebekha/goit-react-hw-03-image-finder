@@ -7,24 +7,24 @@ import css from './Searchbar.module.css';
 
 export class Searchbar extends Component {
   state = {
-    searchData: '',
+    searchQuery: '',
   };
 
   handleSearchInputChange = e => {
     this.setState({
-      searchData: e.currentTarget.value.toLowerCase()
+      searchQuery: e.currentTarget.value.toLowerCase()
     });
   };
 
   handleSubmit = e => {
     e.preventDefault(); 
 
-    if (this.state.searchData.trim() === '') {
+    if (this.state.searchQuery.trim() === '') {
       return toast.info('Your query is empty, please enter data to search.');
     };
 
-    this.props.onSubmit(this.state.searchData);
-    this.setState({ searchData: '' });
+    this.props.onSubmit(this.state.searchQuery);
+    this.setState({ searchQuery: '' });
   }
 
   render() {
@@ -42,7 +42,7 @@ export class Searchbar extends Component {
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            value={this.state.searchData}
+            value={this.state.searchQuery}
             onChange={this.handleSearchInputChange}
           />
         </form>
@@ -52,5 +52,5 @@ export class Searchbar extends Component {
 };
 
 Searchbar.propTypes = {
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
 };

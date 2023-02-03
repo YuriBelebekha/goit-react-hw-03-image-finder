@@ -5,13 +5,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import { getRandomHexColor } from 'utils/getRandomHexColor';
 import { ImageGallery } from './ImageGallery';
 
+
+
 export class App extends Component {
   state = {
-    searchData: '',
+    searchQuery: '',    
   };
 
-  handleSearchFormSubmit = searchData => {
-    this.setState({ searchData });
+  handleSearchFormSubmit = searchQuery => {
+    this.setState({ searchQuery });
   }; 
 
   render() {
@@ -21,7 +23,7 @@ export class App extends Component {
           <Searchbar onSubmit={this.handleSearchFormSubmit} />
         </div>
 
-        <ImageGallery />
+        <ImageGallery searchQuery={this.state.searchQuery} />
 
         <ToastContainer
           autoClose={3000}
