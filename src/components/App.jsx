@@ -5,8 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { getRandomHexColor } from 'utils/getRandomHexColor';
 import { ImageGallery } from './ImageGallery';
 
-
-
 export class App extends Component {
   state = {
     searchQuery: '',    

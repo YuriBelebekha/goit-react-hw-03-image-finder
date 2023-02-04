@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import pixabayApi from 'services/pixabay-api';
+
 import { ImageGalleryItem } from '../ImageGalleryItem';
 
 // import PropTypes from 'prop-types';
@@ -14,10 +15,10 @@ const Status = {
 
 export class ImageGallery extends Component {
   state = {    
-    error: null,
     photo: [],
     totalHits: 0,
-    page: 1,    
+    page: 1,
+    error: null,
     status: Status.IDLE,
   };
   
@@ -27,19 +28,27 @@ export class ImageGallery extends Component {
 
       pixabayApi
         .fetchPixabayPhoto(this.props.searchQuery)
-        .then(photo => this.setState({ photo }))
+        .then(photo => this.setState({ photo: photo }))
         .catch(error => this.setState({ error }))      
-    };
-    
-    console.log(this.state.photo.hits);
+    };    
   };
 
   render() {
-    return(
-      <ul className={css.imageGallery}>      
-        <ImageGalleryItem searchQuery={this.props.searchQuery} />
-      </ul>
-    )
+    const { hits } = this.state.photo;    
+
+    if (hits) {
+      return (
+        <ul className={css.imageGallery}>
+          {hits.map(({ id, webformatURL, tags }) => (
+            <ImageGalleryItem
+              key={id}
+              webformatURL={webformatURL}
+              tags={tags}
+            />
+          ))}          
+        </ul>
+      )
+    }    
   }  
 };
 
