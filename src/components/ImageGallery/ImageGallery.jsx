@@ -1,44 +1,66 @@
 import { Component } from 'react';
 import pixabayApi from 'services/pixabay-api';
+import { toast } from 'react-toastify';
 
 import { ImageGalleryItem } from '../ImageGalleryItem';
+// import { Loader } from '../Loader';
 
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import css from './ImageGallery.module.css';
 
-const Status = {
-  IDLE: 'idle',
-  PENDING: 'pending',
-  RESOLVED: 'resolved',
-  REJECTED: 'rejected',
-}
+
 
 export class ImageGallery extends Component {
   state = {    
-    photo: [],
-    totalHits: 0,
+    images: [],
+    // totalHits: 0,
     page: 1,
-    error: null,
-    status: Status.IDLE,
-  };
-  
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.searchQuery !== this.props.searchQuery) {
-      this.setState({ status: Status.PENDING });
 
+    // isLoading: false,
+
+    // error: null,    
+  };  
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.searchQuery.trim() === '') {      
+      return toast.info('Your query is empty, please enter data to search.');      
+    };
+
+    if (prevProps.searchQuery !== this.props.searchQuery) {
       pixabayApi
         .fetchPixabayPhoto(this.props.searchQuery)
-        .then(photo => this.setState({ photo: photo }))
-        .catch(error => this.setState({ error }))      
+        .then((images) => {
+          if (images.totalHits === 0) {
+            toast.warning('Sorry, there are no images matching your search query.');
+            this.setState({ images: [] });
+          };
+
+          if (images.totalHits > 0) {
+            this.setState({ images });
+            toast.success(`Hooray! We found ${images.totalHits} images`);
+            // this.setState({ isLoading: true }); 
+          };
+        })
+        .catch((error) => {
+          if (error) { toast.error(`Something went wrong... ${error.message}`) };
+        })
+        // .finally(
+        //   this.setState({ isLoading: false })
+        // );      
     };    
   };
 
   render() {
-    const { hits } = this.state.photo;    
+    const { hits } = this.state.images;
+    // const { isLoading } = this.state;
+    
+    // if (isLoading) {
+    //         <Loader />
+    //       } 
 
-    if (hits) {
+    if (hits) {      
       return (
-        <ul className={css.imageGallery}>
+        <ul className={css.ImageGallery}>          
           {hits.map(({ id, webformatURL, tags }) => (
             <ImageGalleryItem
               key={id}
@@ -47,11 +69,13 @@ export class ImageGallery extends Component {
             />
           ))}          
         </ul>
-      )
-    }    
-  }  
+      )          
+    };
+  };
 };
 
-// ImageGallery.propTypes = {
-
-// };
+ImageGallery.propTypes = {
+  key: PropTypes.number,
+  webformatURL: PropTypes.string,
+  tags: PropTypes.string,
+};

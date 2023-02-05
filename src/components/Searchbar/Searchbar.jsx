@@ -1,7 +1,5 @@
 import { Component } from 'react';
 import { HiSearch } from 'react-icons/hi';
-import { toast } from 'react-toastify';
-
 import PropTypes from 'prop-types';
 import css from './Searchbar.module.css';
 
@@ -17,11 +15,7 @@ export class Searchbar extends Component {
   };
 
   handleSubmit = e => {
-    e.preventDefault(); 
-
-    if (this.state.searchQuery.trim() === '') {
-      return toast.info('Your query is empty, please enter data to search.');
-    };
+    e.preventDefault();
 
     this.props.onSubmit(this.state.searchQuery);
     this.setState({ searchQuery: '' });
@@ -29,15 +23,15 @@ export class Searchbar extends Component {
 
   render() {
     return(
-      <header className={css.searchbar}>
-        <form onSubmit={this.handleSubmit} className={css.searchForm}>
-          <button type="submit" className={css.searchFormBtn}>
+      <header className={css.Searchbar}>
+        <form onSubmit={this.handleSubmit} className={css.SearchForm}>
+          <button type="submit" className={css.SearchFormBtn}>
             <HiSearch style={{ width: 24, height: 24 }} />
-            <span className={css.searchFormBtnLabel}>Search</span>
+            <span className={css.SearchFormBtnLabel}>Search</span>
           </button>
 
           <input
-            className={css.searchFormInput}
+            className={css.SearchFormInput}
             type="text"
             autoComplete="off"
             autoFocus

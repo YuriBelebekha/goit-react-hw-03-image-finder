@@ -3,7 +3,7 @@ import axios from 'axios';
 const BASE_URL = 'https://pixabay.com/api/';
 const API_KEY  = '32534348-8cad927330b21d66d879b216b';
 
-export const { image_type, orientation, safesearch, per_page } = {  
+export const { image_type, orientation, safesearch, per_page } = {
   'image_type':  'photo',
   'orientation': 'horizontal',
   'safesearch': true,
