@@ -16,7 +16,6 @@ export class Searchbar extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-
     this.props.onSubmit(this.state.searchQuery);
     this.setState({ searchQuery: '' });
   }
@@ -32,12 +31,12 @@ export class Searchbar extends Component {
 
           <input
             className={css.SearchFormInput}
+            value={this.state.searchQuery}
+            onChange={this.handleSearchInputChange}
             type="text"
             autoComplete="off"
             autoFocus
-            placeholder="Search images and photos"
-            value={this.state.searchQuery}
-            onChange={this.handleSearchInputChange}
+            placeholder="Search images and photos"            
           />
         </form>
       </header>
@@ -46,5 +45,5 @@ export class Searchbar extends Component {
 };
 
 Searchbar.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func,
 };
