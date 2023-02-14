@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { Searchbar } from './Searchbar';
-import pixabayApi from 'services/pixabay-api';
-// import { ImageGallery } from './ImageGallery';
+import { ImageGallery } from './ImageGallery';
+import { Button } from './Button';
 import { ToastContainer, toast, Flip } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { getRandomHexColor } from 'utils/getRandomHexColor';
+import pixabayApi, { per_page } from 'services/pixabay-api';
 import css from './App.module.css';
 
 const Status = {
@@ -21,34 +22,44 @@ const ToastOptions = {
   transition: Flip,
 };
 
+let page = 1;
+
 export class App extends Component {
   state = {
     searchQuery: '',
     images: [],
-    page: 1,
+    // page: 0,
+    totalHits: 0,
     status: Status.IDLE,
     error: null,
   };
 
   handleSearchFormSubmit = async searchQuery => {
+    page = 1;
+
     if (searchQuery.trim() === '') {
       return toast.info('Your query is empty, please enter data to search.', ToastOptions);
     };
     
-    try {
-      const { page } = this.state;
+    try {      
       const { totalHits, hits } = await pixabayApi.fetchPixabayPhoto(searchQuery, page);
-
+        
       if (hits.length === 0) {
         this.setState({ status: Status.IDLE });
         toast.warning('Sorry, there are no images matching your search query.', ToastOptions);
-      } else {
+      }
+      if (hits.length > 0) {        
         this.setState({
           searchQuery,
           images: hits,
           totalHits,
           status: Status.RESOLVED,
         });
+        
+        setTimeout(() => {
+          const { images } = this.state;
+          toast.success(`Total ${totalHits} / Displayed ${images.length}`, ToastOptions);
+        }, 100);        
       };      
     } catch (error) {
       if (error.message.length < 25) {
@@ -59,9 +70,38 @@ export class App extends Component {
     };
   };
 
+  onloadMore = async () => {
+    this.setState({ status: Status.PENDING });
+
+    try {
+      const { searchQuery, totalHits } = this.state;
+      const { hits } = await pixabayApi.fetchPixabayPhoto(searchQuery, (page += 1));
+
+      this.setState(prevState => ({
+        page: prevState.page + 1,
+        images: [...prevState.images, ...hits],
+        status: Status.RESOLVED,
+      }));
+      
+      setTimeout(() => {
+        const { images } = this.state;
+        toast.success(`Total ${totalHits} / Displayed ${images.length}`, ToastOptions);
+      }, 100);
+    } catch (error) {
+      this.setState({ status: Status.REJECTED });
+    }
+  };
+
+
+
+
+  // ADDED SCROLL TO BUTTON
+
+
+
 
   render() {
-    const { status, error } = this.state;
+    const { status, error, images, totalHits } = this.state;
 
     if (status === 'idle') {
       return (
@@ -81,6 +121,13 @@ export class App extends Component {
           <div style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
+
+          <ImageGallery            
+            images={images}
+            page={page}
+          />
+
+          {totalHits > per_page && <Button onloadMore={this.onloadMore} />}
           
           <ToastContainer />
         </div>
@@ -93,21 +140,32 @@ export class App extends Component {
           <div style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
+
+          <ImageGallery            
+            images={images}
+            page={page}
+          />
+
+          {totalHits > per_page && totalHits > images.length && (
+            <Button onloadMore={this.onloadMore} />
+          )}         
           
           <ToastContainer />
         </div>
       )
     };
-
+    
     if (status === 'rejected') {
       return (
         <div className={css.App}>
           <div style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
+
           <div className={css.ErrorMessage}>
             <p>{`${error}. Please try again later.`}</p>            
-          </div>          
+          </div>
+
           <ToastContainer />
         </div>
       )
