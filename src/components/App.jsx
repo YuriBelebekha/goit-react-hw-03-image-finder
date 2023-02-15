@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Searchbar } from './Searchbar';
 import { ImageGallery } from './ImageGallery';
 import { Button } from './Button';
+import { Loader } from './Loader';
 import { ToastContainer, toast, Flip } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { animateScroll as scroll } from 'react-scroll';
 import { getRandomHexColor } from 'utils/getRandomHexColor';
 import pixabayApi, { per_page } from 'services/pixabay-api';
 import css from './App.module.css';
@@ -17,7 +18,7 @@ const Status = {
 };
 
 const ToastOptions = {
-  autoClose: 1000,
+  autoClose: 2000,
   pauseOnFocusLoss: true,
   transition: Flip,
 };
@@ -27,8 +28,7 @@ let page = 1;
 export class App extends Component {
   state = {
     searchQuery: '',
-    images: [],
-    // page: 0,
+    images: [],    
     totalHits: 0,
     status: Status.IDLE,
     error: null,
@@ -48,6 +48,7 @@ export class App extends Component {
         this.setState({ status: Status.IDLE });
         toast.warning('Sorry, there are no images matching your search query.', ToastOptions);
       }
+
       if (hits.length > 0) {        
         this.setState({
           searchQuery,
@@ -76,12 +77,13 @@ export class App extends Component {
     try {
       const { searchQuery, totalHits } = this.state;
       const { hits } = await pixabayApi.fetchPixabayPhoto(searchQuery, (page += 1));
-
-      this.setState(prevState => ({
-        page: prevState.page + 1,
+      
+      this.setState(prevState => ({        
         images: [...prevState.images, ...hits],
         status: Status.RESOLVED,
       }));
+
+      this.scrollGalleryOnLoadMoreBtn();
       
       setTimeout(() => {
         const { images } = this.state;
@@ -92,21 +94,18 @@ export class App extends Component {
     }
   };
 
-
-
-
-  // ADDED SCROLL TO BUTTON
-
-
-
+  scrollGalleryOnLoadMoreBtn = () => {
+    scroll.scrollToBottom();
+  };
 
   render() {
     const { status, error, images, totalHits } = this.state;
 
+    // PENDING
     if (status === 'idle') {
       return (
         <div className={css.App}>
-          <div style={{ backgroundColor: getRandomHexColor() }}>
+          <div className={css.SearchbarBox} style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
 
@@ -115,10 +114,11 @@ export class App extends Component {
       )
     };    
 
+    // PENDING
     if (status === 'pending') {
       return (
         <div className={css.App}>
-          <div style={{ backgroundColor: getRandomHexColor() }}>
+          <div className={css.SearchbarBox} style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
 
@@ -127,6 +127,8 @@ export class App extends Component {
             page={page}
           />
 
+          <Loader />
+
           {totalHits > per_page && <Button onloadMore={this.onloadMore} />}
           
           <ToastContainer />
@@ -134,14 +136,15 @@ export class App extends Component {
       )
     };    
     
+    // RESOLVED
     if (status === 'resolved') {
       return (
         <div className={css.App}>
-          <div style={{ backgroundColor: getRandomHexColor() }}>
+          <div className={css.SearchbarBox} style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
 
-          <ImageGallery            
+          <ImageGallery
             images={images}
             page={page}
           />
@@ -155,10 +158,11 @@ export class App extends Component {
       )
     };
     
+    // REJECTED
     if (status === 'rejected') {
       return (
         <div className={css.App}>
-          <div style={{ backgroundColor: getRandomHexColor() }}>
+          <div className={css.SearchbarBox} style={{ backgroundColor: getRandomHexColor() }}>
             <Searchbar onSubmit={this.handleSearchFormSubmit} />
           </div>
 
@@ -172,47 +176,3 @@ export class App extends Component {
     };
   }
 }
-
-
-
-
-
-// import React, { Component } from 'react';
-// import { ToastContainer } from 'react-toastify';
-// import { Searchbar } from './Searchbar';
-// import 'react-toastify/dist/ReactToastify.css';
-// import { getRandomHexColor } from 'utils/getRandomHexColor';
-// import { ImageGallery } from './ImageGallery';
-// import css from './App.module.css';
-
-// export class App extends Component {
-//   state = {
-//     searchQuery: '',    
-//   };
-
-//   handleSearchFormSubmit = searchQuery => {
-//     this.setState({searchQuery});    
-//   };
-
-//   onloadMore = () => {
-//     this.setState(prevState => ({ page: prevState.page + 1 }));
-//   };
-
-//   render() {
-//     return (
-//       <div className={css.App}>
-//         <div style={{ backgroundColor: getRandomHexColor() }}>
-//           <Searchbar onSubmit={this.handleSearchFormSubmit} />
-//         </div>       
-
-//         <ImageGallery searchQuery={this.state.searchQuery} />        
-
-//         <ToastContainer
-//           autoClose={1000}
-//           limit={3}          
-//           pauseOnFocusLoss
-//         />
-//       </div>
-//     );
-//   };
-// };
