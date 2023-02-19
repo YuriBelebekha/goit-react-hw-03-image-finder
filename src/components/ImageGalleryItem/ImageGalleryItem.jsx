@@ -38,7 +38,11 @@ export class ImageGalleryItem extends Component {
 };
 
 ImageGalleryItem.propTypes = {
-  webformatURL: PropTypes.string,
-  tags: PropTypes.string,
-  largeImageUrl: PropTypes.string,
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      webformatURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+      largeImageUrl: PropTypes.string.isRequired,
+    })
+  ),
 };
